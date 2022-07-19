@@ -1,4 +1,9 @@
 import { ArticleData, extract } from 'article-parser';
+import { v4 as uuidv4 } from 'uuid';
+
+import ArticleModel from '../model';
+import s3 from '@/config/S3';
+import TandainError from '@/utils/TandainError';
 
 interface ConstructorArgs extends ArticleData {
 	id: number;
@@ -8,50 +13,82 @@ interface ConstructorArgs extends ArticleData {
 class Article {
 	public id: number;
 	public userId: number;
-	public url?: string; // NOTE: Not added yet to ERD
-	public title?: string; // NOTE: Not added yet to ERD
-	public description?: string;
-	public image?: string;
-	public content?: string;
-	public author?: string;
-	public published?: string; // NOTE: Published ISO date
-	public source?: string;
-	public ttr?: number;
-	public createdAt: string;
+	public filePath: string;
+	public title: string | null; // NOTE: Not added yet to ERD
+	public description: string | null;
+	public image: string | null;
+	public author: string | null;
+	public published: string | null; // NOTE: Published ISO date
+	public sourceName: string | null;
+	public sourceURL: string | null;
+	public ttr: number | null;
 
-	constructor({
-		id,
-		userId,
-		url,
-		title,
-		description,
-		image,
-		content,
-		author,
-		published,
-		source,
-		ttr,
-	}: ConstructorArgs) {
-		this.id = id;
-		this.userId = userId;
-		this.url = url;
-		this.title = title;
-		this.description = description;
-		this.image = image;
-		this.content = content;
-		this.author = author;
-		this.published = published;
-		this.source = source;
-		this.ttr = ttr; // NOTE: Time to read
-		this.createdAt = new Date().toISOString();
+	private static async upload(article: string, userId: number) {
+		// NOTE: Upload article to AWS S3
+
+		const date = new Date();
+		const year = date.getFullYear();
+		const month = date.getMonth() + 1;
+		const uuid = uuidv4();
+
+		const filename = `${userId}-${uuid}.html`;
+		const path = `content/${year}/${month}/${filename}`;
+
+		try {
+			await s3
+				.putObject({
+					Bucket: 'tandainbucket',
+					Key: path,
+					ContentType: 'text/html',
+					Body: Buffer.from(article),
+				})
+				.promise();
+
+			return path;
+		} catch (err) {
+			throw new TandainError('Failed to store the article');
+		}
 	}
 
-	static async extract(contentURL: string) {
+	static async extract(contentURL: string, userId: number) {
 		try {
-			const extractedArticle = await extract(contentURL);
+			// NOTE: Extract article from given URL
+			const {
+				content,
+				title,
+				description,
+				image,
+				author,
+				published,
+				source,
+				url,
+				ttr,
+			} = await extract(contentURL);
 
-      return extractedArticle
-		} catch (err) {}
+			if (!content) {
+				throw new TandainError('Failed to read the article to be saved');
+			}
+
+			const filePath = await this.upload(content, userId);
+
+      // NOTE: Store article information to database
+			const insertedArticle = await ArticleModel.insertOne({
+				user_id: userId,
+				file_path: filePath,
+				title,
+				description,
+				image,
+				author,
+				published,
+				source_name: source,
+				source_url: url,
+				ttr,
+			});
+
+			return insertedArticle;
+		} catch (err) {
+			throw new TandainError(err.message);
+		}
 	}
 }
 
