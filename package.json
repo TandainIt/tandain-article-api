@@ -5,14 +5,15 @@
   "main": "index.js",
   "scripts": {
     "dev": "env-cmd -f .env.local nodemon",
+    "docker": "nodemon -L",
     "test": "env-cmd -f .env.local jest"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.131.0",
     "article-parser": "^7.0.0-rc3",
-    "aws-sdk": "^2.1176.0",
     "axios": "^0.27.2",
     "env-cmd": "^10.1.0",
     "express": "^4.18.1",
