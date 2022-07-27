@@ -1,27 +1,22 @@
-import { ArticleData, extract } from 'article-parser';
+import { extract } from 'article-parser';
 import { v4 as uuidv4 } from 'uuid';
 
 import ArticleModel from '../model';
 import s3 from '@/config/S3';
 import TandainError from '@/utils/TandainError';
 
-interface ConstructorArgs extends ArticleData {
-	id: number;
-	userId: number;
-}
-
 class Article {
 	public id: number;
 	public userId: number;
 	public filePath: string;
-	public title: string | null; // NOTE: Not added yet to ERD
+	public title: string | null;
 	public description: string | null;
 	public image: string | null;
 	public author: string | null;
 	public published: string | null; // NOTE: Published ISO date
 	public sourceName: string | null;
 	public sourceURL: string | null;
-	public ttr: number | null;
+	public ttr: number | null; // NOTE: Time to read the article
 
 	private static async upload(article: string, userId: number) {
 		// NOTE: Upload article to AWS S3
@@ -42,15 +37,17 @@ class Article {
 					ContentType: 'text/html',
 					Body: Buffer.from(article),
 				})
-				.promise();
 
 			return path;
 		} catch (err) {
-			throw new TandainError('Failed to store the article');
+			throw new TandainError('Failed to store the article', {
+				name: err.code,
+        code: err.statusCode
+			});
 		}
 	}
 
-	static async extract(contentURL: string, userId: number) {
+	static async add(contentURL: string, userId: number) {
 		try {
 			// NOTE: Extract article from given URL
 			const {
@@ -71,7 +68,7 @@ class Article {
 
 			const filePath = await this.upload(content, userId);
 
-      // NOTE: Store article information to database
+			// NOTE: Store article information to database
 			const insertedArticle = await ArticleModel.insertOne({
 				user_id: userId,
 				file_path: filePath,

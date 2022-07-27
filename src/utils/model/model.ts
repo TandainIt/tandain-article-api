@@ -1,6 +1,6 @@
-import { JoinParams } from './model.types';
+import { ObjectQuery } from './model.types';
 
-export const joinQuery = (obj: JoinParams, joinedBy: string = ', ') => {
+export const joinQuery = (obj: ObjectQuery, joinedBy: string = ', ') => {
 	return Object.keys(obj)
 		.map((key) => {
 			const value = obj[key];
@@ -14,7 +14,7 @@ export const joinQuery = (obj: JoinParams, joinedBy: string = ', ') => {
 		.join(joinedBy);
 };
 
-export const getColumns = (obj: JoinParams) => {
+export const getInsertValue = (obj: ObjectQuery) => {
 	const keys = Object.keys(obj);
 	const columns = keys.join(', ');
 	const values = keys

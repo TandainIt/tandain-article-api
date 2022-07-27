@@ -1,4 +1,5 @@
-import { joinQuery } from './model';
+import { getInsertValue, joinQuery } from './model';
+import { ObjectQuery } from './model.types';
 
 describe('utils/model', () => {
 	describe('joinQuery', () => {
@@ -44,6 +45,28 @@ describe('utils/model', () => {
 			expect(result).toEqual(
 				`revoked_by_ip='${obj.revoked_by_ip}' AND revoked_at='${obj.revoked_at}' AND replaced_by IS NULL`
 			);
+		});
+	});
+
+	describe('getInsertValues', () => {
+		it('should return columns from object key and values from object property values', () => {
+			const obj: ObjectQuery = {
+				id: null,
+				fullname: 'Test',
+				email: 'test@test.com',
+				phone_number: 8123456789,
+				country: 'Indonesia',
+			};
+
+			const { columns, values } = getInsertValue(obj);
+
+			const keys = Object.keys(obj);
+			const mockValues = keys.map((key) => {
+				return obj[key] ? `'${obj[key]}'` : 'null';
+			});
+
+			expect(columns.split(', ')).toEqual(keys);
+			expect(values.split(', ')).toEqual(mockValues);
 		});
 	});
 });

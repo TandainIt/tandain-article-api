@@ -1,6 +1,7 @@
-import pool from '@/config/posgresql';
+import pool from '@/config/db/posgresql';
 
-import { getColumns } from '@/utils/model/model';
+import { getInsertValue } from '@/utils/model/model';
+import TandainError from '@/utils/TandainError';
 import { QueryResult } from 'pg';
 
 import Article from '../service';
@@ -16,7 +17,7 @@ interface InsertArticle
 class ArticleModel {
 	static async insertOne(inserts: InsertArticle) {
 
-		const { columns, values } = getColumns(inserts);
+		const { columns, values } = getInsertValue(inserts);
 
 		try {
 			const query = `INSERT INTO articles (${columns}) VALUES(${values}) RETURNING *`;
@@ -25,7 +26,7 @@ class ArticleModel {
 
 			return result.rows[0];
 		} catch (err) {
-			console.log('Err: ', err);
+			throw new TandainError(err.message);
 		}
 	}
 }

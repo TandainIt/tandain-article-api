@@ -1,3 +1,3 @@
-export interface JoinParams<T = any> {
+export interface ObjectQuery<T = any> {
 	[key: string]: T;
 }
