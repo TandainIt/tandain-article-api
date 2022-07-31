@@ -17,6 +17,28 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: dev_tandain_article; Type: DATABASE; Schema: -; Owner: postgres
+--
+
+CREATE DATABASE dev_tandain_article WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'English_Indonesia.1252';
+
+
+ALTER DATABASE dev_tandain_article OWNER TO postgres;
+
+\connect dev_tandain_article
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
 -- Name: trigger_set_timestamp(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -103,19 +125,7 @@ ALTER TABLE ONLY public.articles
 CREATE TRIGGER set_timestamp BEFORE UPDATE ON public.articles FOR EACH ROW EXECUTE FUNCTION public.trigger_set_timestamp();
 
 
---
--- Name: TABLE articles; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.articles TO tandain_admin;
-
-
---
--- Name: SEQUENCE articles_id_seq; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT SELECT,USAGE ON SEQUENCE public.articles_id_seq TO tandain_admin;
-
+SET search_path TO public;
 
 --
 -- PostgreSQL database dump complete
