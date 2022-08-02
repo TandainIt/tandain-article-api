@@ -11,23 +11,23 @@ COPY package.json ./
 COPY yarn.lock ./
 RUN yarn install
 
-# Set ownership and permissions
-USER node
-
 EXPOSE 3002
 
 ## DEVELOPMENT
 
 FROM base as development
 
-CMD ["yarn", "run", "build"]
-
 # Bundle app source
-COPY /dist .
+COPY . .
+RUN yarn run build
+CMD ["yarn", "run", "start"]
 
 ## LOCAL
 
 FROM base as local
+
+# Set ownership and permissions
+USER node
 
 # Bundle app source
 COPY . .
