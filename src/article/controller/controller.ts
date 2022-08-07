@@ -1,16 +1,15 @@
 import { Router } from 'express';
 
 import Article from '../service'
+import authenticate from '@/middleware/authenticate';
 
 const router = Router();
 
-router.post('/article', async (req, res) => {
+router.post('/article', authenticate, async (req, res) => {
   const { url } = req.body
 
-  const userId = 1; // TODO: Get userId from authentication
-
   try {
-    const result = await Article.extract(url, userId)
+    const result = await Article.add(url, req.user.id)
 
     res.send(result)
   } catch(err) {

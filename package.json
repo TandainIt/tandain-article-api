@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "env-cmd -f .env.local nodemon",
-    "build": "npx tsc && tsc-alias",
+    "build": "npx tsc -p tsconfig.prod.json && tsc-alias",
     "start": "node dist/src/app.js",
     "docker": "nodemon -L",
     "test": "env-cmd -f .env.local jest"

@@ -5,7 +5,7 @@ import { S3 } from '@aws-sdk/client-s3';
 import Article from './service';
 import ArticleModel from '../model';
 import TandainError from '@/utils/TandainError';
-import mockArticle from '../../../__mock__/article';
+import mockArticle from '../../../__mock__/article.mock';
 
 jest.mock('uuid', () => ({
 	v4: jest.fn().mockReturnValue('uuid'),

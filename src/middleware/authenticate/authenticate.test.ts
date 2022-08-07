@@ -1,4 +1,4 @@
-import { generateRandomString } from '@/utils/utils';
+import { generateRandomString } from '@/utils/global';
 import { NextFunction, Request, Response } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import authenticate from './authenticate';

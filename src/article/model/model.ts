@@ -1,4 +1,4 @@
-import pool from '@/config/db/posgresql';
+import pool from '@/config/db/postgresql';
 
 import { getInsertValue } from '@/utils/model/model';
 import TandainError from '@/utils/TandainError';
