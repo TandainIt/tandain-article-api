@@ -63,7 +63,10 @@ class Article {
 			} = await extract(contentURL);
 
 			if (!content) {
-				throw new TandainError('Failed to read the article to be saved');
+				throw new TandainError('Failed to read the article to be saved', {
+          code: 400,
+          name: 'ARTICLE_NOT_FOUND'
+        });
 			}
 
 			const filePath = await this.upload(content, userId);

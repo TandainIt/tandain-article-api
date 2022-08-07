@@ -144,28 +144,31 @@ describe('article/service', () => {
 		});
 
 		it('should throw "Failed to read the article to be saved" if content value is null', async () => {
-      const urlMock = 'https://example.com';
-      const nullContentMock = { ...mockArticle, content: undefined }
+			const urlMock = 'https://example.com';
+			const nullContentMock = { ...mockArticle, content: undefined };
 
-      extractMock.mockResolvedValue(nullContentMock);
+			extractMock.mockResolvedValue(nullContentMock);
 
-      await expect(Article.add(urlMock, 1)).rejects.toThrowError(
-        new TandainError('Failed to read the article to be saved')
-      )
-    })
+			await expect(Article.add(urlMock, 1)).rejects.toThrowError(
+				new TandainError('Failed to read the article to be saved', {
+					code: 400,
+					name: 'ARTICLE_NOT_FOUND',
+				})
+			);
+		});
 
 		it('should throw "Failed to store the article" if uploading is error', async () => {
-      const urlMock = 'https://example.com';
+			const urlMock = 'https://example.com';
 
 			extractMock.mockResolvedValue(mockArticle);
 			uploadMock.mockRejectedValue({
-        message: 'Failed to store the article',
-        status: 500
-      });
+				message: 'Failed to store the article',
+				status: 500,
+			});
 
-      await expect(Article.add(urlMock, 1)).rejects.toThrowError(
-        new TandainError('Failed to store the article')
-      )
-    })
+			await expect(Article.add(urlMock, 1)).rejects.toThrowError(
+				new TandainError('Failed to store the article')
+			);
+		});
 	});
 });
