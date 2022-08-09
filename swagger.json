@@ -1,0 +1,194 @@
+{
+	"openapi": "3.0.0",
+
+	"info": {
+		"title": "Article API",
+		"description": "Tandain User API",
+		"version": "0.1.1",
+		"license": {
+			"name": "MIT,",
+			"url": "https://opensource.org/licenses/MIT"
+		}
+	},
+
+	"servers": [
+		{
+			"url": "http://localhost:3001",
+			"description": "Local server for development"
+		}
+	],
+
+	"components": {
+		"securitySchemes": {
+			"bearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		},
+		"schemas": {
+			"BASE_ERROR_RESPONSE": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"code": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"message": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		"examples": {
+			"INTERNAL_SERVER_ERROR": {
+				"description": "Something went wrong with server",
+				"value": {
+					"name": "INTERNAL_SERVER_ERROR",
+					"code": 500,
+					"message": "Internal Server Error"
+				}
+			},
+			"ARTICLE_NOT_FOUND": {
+				"description": "Property 'content' from article-parser is null. It is likely the library can not read the article to parse.",
+				"value": {
+          "name": "ARTICLE_NOT_FOUND",
+					"code": 400,
+					"message": "Failed to read the article to be saved"
+				}
+			},
+			"S3_CREDENTIAL_ERROR": {
+				"description": "Server failed to store article to S3 due to invalid AWS credentials",
+				"value": {
+					"name": "CredentialsError",
+					"code": 400,
+          "message": "Failed to store the article"
+				}
+			},
+      "S3_NOT_FOUND": {
+				"description": "Server failed to store article to S3 due to the specified bucket does not exist",
+				"value": {
+					"name": "NoSuchBucket",
+					"code": 404,
+          "message": "Failed to store the article"
+				}
+			}
+		}
+	},
+
+	"paths": {
+		"/api/v1/article": {
+			"post": {
+				"summary": "Add an article from given URL",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"url": {
+										"type": "string",
+										"example": "https://www.cnbc.com/2022/07/02/tesla-tsla-q2-2022-vehicle-delivery-and-production-numbers.html"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Success to parse the article",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "integer",
+											"format": "int64",
+											"example": 11
+										},
+										"user_id": {
+											"type": "integer",
+											"format": "int64",
+											"example": 10
+										},
+										"source_url": {
+											"type": "string",
+											"example": "https://www.cnbc.com/2022/07/02/tesla-tsla-q2-2022-vehicle-delivery-and-production-numbers.html"
+										},
+										"source_name": {
+											"type": "string",
+											"example": "cnbc.com"
+										},
+										"title": {
+											"type": "string",
+											"example": "Tesla delivered 254,695 electric vehicles in the second quarter of 2022"
+										},
+										"description": {
+											"type": "string",
+											"example": "Tesla just posted its second-quarter vehicle production and delivery numbers for 2022. Here are the key numbers: Total deliveries Q2 2022: 254,695 Total production Q2 2022: 258,580 Delivery numbers, which are..."
+										},
+										"image": {
+											"type": "string",
+											"example": "https://image.cnbcfm.com/api/v1/image/106996300-1641301134887-gettyimages-1237038101-20090101211205-99-269457.jpeg?v=1641301183&w=1920&h=1080"
+										},
+										"author": {
+											"type": "string",
+											"example": "Lora Kolodny"
+										},
+										"published": {
+											"type": "string",
+											"example": "2022-07-04T01:48:16+0000"
+										},
+										"ttr": {
+											"type": "integer",
+											"format": "int64",
+											"example": 67
+										},
+										"file_path": {
+											"type": "string",
+											"example": "content/2022/8/1-ad75507a-ff7c-40c3-b655-062e8f6bb2b1.html"
+										},
+										"created_at": {
+											"type": "string",
+											"example": "2022-07-04T01:48:16+0000"
+										},
+										"updated_at": {
+											"type": "string",
+											"example": "2022-07-04T01:48:16+0000"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Failed to parse the article",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BASE_ERROR_RESPONSE"
+								},
+								"examples": {
+                  "ARTICLE_NOT_FOUND": {
+                    "$ref": "#/components/examples/ARTICLE_NOT_FOUND"
+                  },
+                  "S3_CREDENTIAL_ERROR": {
+                    "$ref": "#/components/examples/S3_CREDENTIAL_ERROR"
+                  },
+                  "S3_NOT_FOUND": {
+                    "$ref": "#/components/examples/S3_NOT_FOUND"
+                  }
+                }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
