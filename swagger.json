@@ -13,14 +13,20 @@
 
 	"servers": [
 		{
-			"url": "http://localhost:3001",
+			"url": "http://localhost:3002",
 			"description": "Local server for development"
 		}
 	],
 
+  "security": [
+    {
+      "BearerAuth": ["read", "write"]
+    }
+  ],
+
 	"components": {
 		"securitySchemes": {
-			"bearerAuth": {
+			"BearerAuth": {
 				"type": "http",
 				"scheme": "bearer",
 				"bearerFormat": "JWT"
