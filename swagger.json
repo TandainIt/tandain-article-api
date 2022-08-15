@@ -18,11 +18,11 @@
 		}
 	],
 
-  "security": [
-    {
-      "BearerAuth": ["read", "write"]
-    }
-  ],
+	"security": [
+		{
+			"BearerAuth": ["read", "write"]
+		}
+	],
 
 	"components": {
 		"securitySchemes": {
@@ -33,6 +33,52 @@
 			}
 		},
 		"schemas": {
+			"ARTICLE": {
+				"properties": {
+					"id": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"user_id": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"source_url": {
+						"type": "string"
+					},
+					"source_name": {
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"image": {
+						"type": "string"
+					},
+					"author": {
+						"type": "string"
+					},
+					"published": {
+						"type": "string"
+					},
+					"ttr": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"file_path": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					}
+				}
+			},
 			"BASE_ERROR_RESPONSE": {
 				"properties": {
 					"name": {
@@ -49,6 +95,24 @@
 			}
 		},
 		"examples": {
+			"ARTICLE": {
+				"description": "Successfully get an article",
+				"value": {
+					"id": 11,
+					"user_id": 10,
+					"source_url": "https://www.cnbc.com/2022/07/02/tesla-tsla-q2-2022-vehicle-delivery-and-production-numbers.html",
+					"source_name": "cnbc.com",
+					"title": "Tesla delivered 254,695 electric vehicles in the second quarter of 2022",
+					"description": "Tesla just posted its second-quarter vehicle production and delivery numbers for 2022. Here are the key numbers: Total deliveries Q2 2022: 254,695 Total production Q2 2022: 258,580 Delivery numbers, which are...",
+					"image": "https://image.cnbcfm.com/api/v1/image/106996300-1641301134887-gettyimages-1237038101-20090101211205-99-269457.jpeg?v=1641301183&w=1920&h=1080",
+					"author": "Lora Kolodny",
+					"published": "2022-07-04T01:48:16+0000",
+					"ttr": 67,
+					"file_path": "content/2022/8/1-ad75507a-ff7c-40c3-b655-062e8f6bb2b1.html",
+					"created_at": "2022-07-04T01:48:16+0000",
+					"updated_at": "2022-07-04T01:48:16+0000"
+				}
+			},
 			"INTERNAL_SERVER_ERROR": {
 				"description": "Something went wrong with server",
 				"value": {
@@ -57,10 +121,10 @@
 					"message": "Internal Server Error"
 				}
 			},
-			"ARTICLE_NOT_FOUND": {
+			"FAILED_TO_PARSE": {
 				"description": "Property 'content' from article-parser is null. It is likely the library can not read the article to parse.",
 				"value": {
-          "name": "ARTICLE_NOT_FOUND",
+					"name": "FAILED_TO_PARSE",
 					"code": 400,
 					"message": "Failed to read the article to be saved"
 				}
@@ -70,15 +134,23 @@
 				"value": {
 					"name": "CredentialsError",
 					"code": 400,
-          "message": "Failed to store the article"
+					"message": "Failed to store the article"
 				}
 			},
-      "S3_NOT_FOUND": {
+			"S3_NOT_FOUND": {
 				"description": "Server failed to store article to S3 due to the specified bucket does not exist",
 				"value": {
 					"name": "NoSuchBucket",
 					"code": 404,
-          "message": "Failed to store the article"
+					"message": "Failed to store the article"
+				}
+			},
+			"ARTICLE_NOT_FOUND": {
+				"description": "Article is not found",
+				"value": {
+					"name": "ARTICLE_NOT_FOUND",
+					"code": 404,
+					"message": "Article is not found"
 				}
 			}
 		}
@@ -110,63 +182,11 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"properties": {
-										"id": {
-											"type": "integer",
-											"format": "int64",
-											"example": 11
-										},
-										"user_id": {
-											"type": "integer",
-											"format": "int64",
-											"example": 10
-										},
-										"source_url": {
-											"type": "string",
-											"example": "https://www.cnbc.com/2022/07/02/tesla-tsla-q2-2022-vehicle-delivery-and-production-numbers.html"
-										},
-										"source_name": {
-											"type": "string",
-											"example": "cnbc.com"
-										},
-										"title": {
-											"type": "string",
-											"example": "Tesla delivered 254,695 electric vehicles in the second quarter of 2022"
-										},
-										"description": {
-											"type": "string",
-											"example": "Tesla just posted its second-quarter vehicle production and delivery numbers for 2022. Here are the key numbers: Total deliveries Q2 2022: 254,695 Total production Q2 2022: 258,580 Delivery numbers, which are..."
-										},
-										"image": {
-											"type": "string",
-											"example": "https://image.cnbcfm.com/api/v1/image/106996300-1641301134887-gettyimages-1237038101-20090101211205-99-269457.jpeg?v=1641301183&w=1920&h=1080"
-										},
-										"author": {
-											"type": "string",
-											"example": "Lora Kolodny"
-										},
-										"published": {
-											"type": "string",
-											"example": "2022-07-04T01:48:16+0000"
-										},
-										"ttr": {
-											"type": "integer",
-											"format": "int64",
-											"example": 67
-										},
-										"file_path": {
-											"type": "string",
-											"example": "content/2022/8/1-ad75507a-ff7c-40c3-b655-062e8f6bb2b1.html"
-										},
-										"created_at": {
-											"type": "string",
-											"example": "2022-07-04T01:48:16+0000"
-										},
-										"updated_at": {
-											"type": "string",
-											"example": "2022-07-04T01:48:16+0000"
-										}
+									"$ref": "#/components/schemas/ARTICLE"
+								},
+								"examples": {
+									"ARTICLE": {
+										"$ref": "#/components/examples/ARTICLE"
 									}
 								}
 							}
@@ -180,16 +200,81 @@
 									"$ref": "#/components/schemas/BASE_ERROR_RESPONSE"
 								},
 								"examples": {
-                  "ARTICLE_NOT_FOUND": {
-                    "$ref": "#/components/examples/ARTICLE_NOT_FOUND"
-                  },
-                  "S3_CREDENTIAL_ERROR": {
-                    "$ref": "#/components/examples/S3_CREDENTIAL_ERROR"
-                  },
-                  "S3_NOT_FOUND": {
-                    "$ref": "#/components/examples/S3_NOT_FOUND"
-                  }
-                }
+									"FAILED_TO_PARSE": {
+										"$ref": "#/components/examples/FAILED_TO_PARSE"
+									},
+									"S3_CREDENTIAL_ERROR": {
+										"$ref": "#/components/examples/S3_CREDENTIAL_ERROR"
+									},
+									"S3_NOT_FOUND": {
+										"$ref": "#/components/examples/S3_NOT_FOUND"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/article/{id}": {
+			"get": {
+				"summary": "Get an article by its id",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"description": "The user ID",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"minimum": 1
+						},
+						"example": 1
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Success to GET the article",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ARTICLE"
+								},
+								"examples": {
+									"ARTICLE": {
+										"$ref": "#/components/examples/ARTICLE"
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Article is not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BASE_ERROR_RESPONSE"
+								},
+								"examples": {
+									"ARTICLE_NOT_FOUND": {
+										"$ref": "#/components/examples/ARTICLE_NOT_FOUND"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Something went wrong with server",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BASE_ERROR_RESPONSE"
+								},
+								"examples": {
+									"INTERNAL_SERVER_ERROR": {
+										"$ref": "#/components/examples/INTERNAL_SERVER_ERROR"
+									}
+								}
 							}
 						}
 					}

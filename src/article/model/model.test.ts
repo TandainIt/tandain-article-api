@@ -22,6 +22,65 @@ describe('article/model', () => {
 		jest.clearAllMocks();
 	});
 
+	describe('findOne', () => {
+		it('should return article by id', async () => {
+			const mockArticleId = 49;
+			const mockRows = {
+				rows: [
+					{
+						id: mockArticleId,
+						user_id: 1,
+						source_url: 'https://reactjs.org/',
+						source_name: 'reactjs.org',
+						title: 'React – A JavaScript library for building user interfaces',
+						description: 'A JavaScript library for building user interfaces',
+						image: 'https://reactjs.org/logo-og.png',
+						author: null,
+						published: null,
+						ttr: 67,
+						created_at: null,
+						updated_at: null,
+						file_path:
+							'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+					},
+				],
+			};
+
+			pool.query.mockResolvedValue(mockRows);
+
+			const article = await ArticleModel.findOne({ id: mockArticleId });
+
+			expect(article).toEqual(mockRows.rows[0]);
+		});
+
+		it('should return null if article is not exists', async () => {
+			const mockArticleId = 49;
+			const mockRows = {
+				rows: [],
+			};
+
+			pool.query.mockResolvedValue(mockRows);
+
+			const article = await ArticleModel.findOne({ id: mockArticleId });
+
+			expect(article).toEqual(null);
+		});
+
+		it('should throw an error if something went wrong', async () => {
+			const posgresqlError = {
+				name: 'system_error',
+				code: '58000',
+				message: 'Failed to retrieve memory usage at process exit',
+			};
+
+			pool.query.mockRejectedValue(posgresqlError);
+
+			await expect(ArticleModel.findOne({ id: 49 })).rejects.toThrowError(
+				new TandainError('Failed to retrieve memory usage at process exit')
+			);
+		});
+	});
+
 	describe('insertOne', () => {
 		it('should success store the article', async () => {
 			const queries = {

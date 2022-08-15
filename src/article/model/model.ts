@@ -1,28 +1,36 @@
 import pool from '@/config/db/postgresql';
-
-import { getInsertValue } from '@/utils/model/model';
-import TandainError from '@/utils/TandainError';
 import { QueryResult } from 'pg';
 
+import { getInsertValue, joinQuery } from '@/utils/model/model';
+import TandainError from '@/utils/TandainError';
 import Article from '../service';
-
-interface InsertArticle
-	extends Omit<Partial<Article>, 'id' | 'userId' | 'filePath' | 'sourceURL' | 'sourceName'> {
-	user_id: number;
-  file_path: string | null;
-  source_url?: string | null;
-  source_name?: string | null;
-}
+import { WhereArticleOne, InsertArticle } from './model.types';
 
 class ArticleModel {
-	static async insertOne(inserts: InsertArticle) {
+	static async findOne(wheres: WhereArticleOne): Promise<Article | null> {
+		const whereQuery = joinQuery(wheres);
 
+		try {
+			const query = `SELECT * FROM articles WHERE ${whereQuery}`;
+			const result: QueryResult<Article> = await pool.query(query);
+
+			const article = result.rows[0] || null;
+
+			return article;
+		} catch (err) {
+			throw new TandainError(err.message, {
+				code: 500,
+			});
+		}
+	}
+
+	static async insertOne(inserts: InsertArticle) {
 		const { columns, values } = getInsertValue(inserts);
 
 		try {
 			const query = `INSERT INTO articles (${columns}) VALUES(${values}) RETURNING *`;
 
-			const result: QueryResult<InsertArticle> = await pool.query(query);
+			const result: QueryResult<Article> = await pool.query(query);
 
 			return result.rows[0];
 		} catch (err) {
