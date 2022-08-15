@@ -18,7 +18,9 @@ class ArticleModel {
 
 			return article;
 		} catch (err) {
-			throw new TandainError(err.message);
+			throw new TandainError(err.message, {
+				code: 500,
+			});
 		}
 	}
 
