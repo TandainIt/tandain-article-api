@@ -7,16 +7,18 @@ import TandainError from '@/utils/TandainError';
 
 class Article {
 	public id: number;
-	public userId: number;
-	public filePath: string;
+	public user_id: number;
+	public file_path: string;
 	public title: string | null;
 	public description: string | null;
 	public image: string | null;
 	public author: string | null;
 	public published: string | null; // NOTE: Published ISO date
-	public sourceName: string | null;
-	public sourceURL: string | null;
+	public source_name: string | null;
+	public source_url: string | null;
 	public ttr: number | null; // NOTE: Time to read the article
+	public created_at: string;
+	public updated_at: string;
 
 	private static async upload(article: string, userId: number) {
 		// NOTE: Upload article to AWS S3
@@ -30,20 +32,27 @@ class Article {
 		const path = `content/${year}/${month}/${filename}`;
 
 		try {
-			await s3
-				.putObject({
-					Bucket: 'tandainbucket',
-					Key: path,
-					ContentType: 'text/html',
-					Body: Buffer.from(article),
-				})
+			await s3.putObject({
+				Bucket: 'tandainbucket',
+				Key: path,
+				ContentType: 'text/html',
+				Body: Buffer.from(article),
+			});
 
 			return path;
 		} catch (err) {
 			throw new TandainError('Failed to store the article', {
 				name: err.code,
-        code: err.statusCode
+				code: err.statusCode,
 			});
+		}
+	}
+
+	static async get(articleId: number) {
+		try {
+			return await ArticleModel.findOne({ id: articleId });
+		} catch ({ message, code, name }) {
+			throw new TandainError(message, { code, name });
 		}
 	}
 
@@ -64,9 +73,9 @@ class Article {
 
 			if (!content) {
 				throw new TandainError('Failed to read the article to be saved', {
-          code: 400,
-          name: 'ARTICLE_NOT_FOUND'
-        });
+					code: 400,
+					name: 'ARTICLE_NOT_FOUND',
+				});
 			}
 
 			const filePath = await this.upload(content, userId);

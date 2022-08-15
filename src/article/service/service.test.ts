@@ -5,7 +5,7 @@ import { S3 } from '@aws-sdk/client-s3';
 import Article from './service';
 import ArticleModel from '../model';
 import TandainError from '@/utils/TandainError';
-import mockArticle from '../../../__mock__/article.mock';
+import mockParsedArticle from '../../../__mock__/article.mock';
 
 jest.mock('uuid', () => ({
 	v4: jest.fn().mockReturnValue('uuid'),
@@ -24,16 +24,33 @@ jest.mock('article-parser', () => {
 });
 
 const uploadMock = jest.spyOn(Article as any, 'upload');
+
+const mockFindOne = jest.spyOn(ArticleModel, 'findOne');
 const insertOneArticleMock = jest.spyOn(ArticleModel as any, 'insertOne');
 
 describe('article/service', () => {
+	const mockFilePath = 'content/2022/07/filename';
+	const mockArticle = {
+		id: 1,
+		user_id: 1,
+		source_url: mockParsedArticle.url,
+		source_name: mockParsedArticle.source,
+		title: mockParsedArticle.title,
+		description: mockParsedArticle.description,
+		image: mockParsedArticle.image,
+		author: mockParsedArticle.author,
+		published: mockParsedArticle.published,
+		ttr: mockParsedArticle.ttr,
+		created_at: new Date().toISOString(),
+		updated_at: new Date().toISOString(),
+		file_path: mockFilePath,
+	};
+
 	describe('upload', () => {
 		let mockS3: any;
-		let extractMock: any;
 
 		beforeEach(() => {
 			mockS3 = new S3({});
-			extractMock = extract;
 		});
 
 		it('should success store article html to S3 bucket', async () => {
@@ -52,7 +69,10 @@ describe('article/service', () => {
 			const filename = `${mockUserId}-${uuid}.html`;
 			const expectedPath = `content/${year}/${month}/${filename}`;
 
-			const path = await Article['upload'](mockArticle.content, mockUserId);
+			const path = await Article['upload'](
+				mockParsedArticle.content,
+				mockUserId
+			);
 
 			expect(path).toEqual(expectedPath);
 		});
@@ -72,7 +92,7 @@ describe('article/service', () => {
 			});
 
 			await expect(
-				Article['upload'](mockArticle.content, mockUserId)
+				Article['upload'](mockParsedArticle.content, mockUserId)
 			).rejects.toThrowError(
 				new TandainError('Failed to store the article', {
 					name: 'CredentialsError',
@@ -98,11 +118,43 @@ describe('article/service', () => {
 			});
 
 			await expect(
-				Article['upload'](mockArticle.content, mockUserId)
+				Article['upload'](mockParsedArticle.content, mockUserId)
 			).rejects.toThrowError(
 				new TandainError('Failed to store the article', {
 					name: 'NoSuchBucket',
 					code: 404,
+				})
+			);
+		});
+	});
+
+	describe('get', () => {
+		it('should return an article by id', async () => {
+			mockFindOne.mockResolvedValue(mockArticle);
+
+			const article = await Article.get(1);
+
+			expect(article).toEqual(mockArticle);
+		});
+
+		it('should return null if article by id is not exist', async () => {
+			mockFindOne.mockResolvedValue(null);
+
+			const article = await Article.get(1);
+
+			expect(article).toEqual(null);
+		});
+
+		it('should return error if there is something wrong when getting an article from database', async () => {
+			mockFindOne.mockRejectedValue({
+				message: 'Failed to retrieve memory usage at process exit',
+				status: 500,
+			});
+
+			await expect(Article.get(1)).rejects.toThrowError(
+				new TandainError('Failed to retrieve memory usage at process exit', {
+					code: 500,
+					name: 'Internal Server Error',
 				})
 			);
 		});
@@ -117,35 +169,19 @@ describe('article/service', () => {
 
 		it('should return inserted article from given URL', async () => {
 			const urlMock = 'https://example.com';
-			const filePathMock = 'content/2022/07/filename';
-			const insertedArticleMock = {
-				id: 1,
-				user_id: 1,
-				source_url: mockArticle.url,
-				source_name: mockArticle.source,
-				title: mockArticle.title,
-				description: mockArticle.description,
-				image: mockArticle.image,
-				author: mockArticle.author,
-				published: mockArticle.published,
-				ttr: mockArticle.ttr,
-				created_at: new Date().toISOString(),
-				updated_at: new Date().toISOString(),
-				file_path: filePathMock,
-			};
 
-			extractMock.mockResolvedValue(mockArticle);
-			uploadMock.mockResolvedValue(filePathMock);
-			insertOneArticleMock.mockResolvedValue(insertedArticleMock);
+			extractMock.mockResolvedValue(mockParsedArticle);
+			uploadMock.mockResolvedValue(mockFilePath);
+			insertOneArticleMock.mockResolvedValue(mockArticle);
 
 			const article = await Article.add(urlMock, 1);
 
-			expect(article).toEqual(insertedArticleMock);
+			expect(article).toEqual(mockArticle);
 		});
 
 		it('should throw "Failed to read the article to be saved" if content value is null', async () => {
 			const urlMock = 'https://example.com';
-			const nullContentMock = { ...mockArticle, content: undefined };
+			const nullContentMock = { ...mockParsedArticle, content: undefined };
 
 			extractMock.mockResolvedValue(nullContentMock);
 
@@ -160,7 +196,7 @@ describe('article/service', () => {
 		it('should throw "Failed to store the article" if uploading is error', async () => {
 			const urlMock = 'https://example.com';
 
-			extractMock.mockResolvedValue(mockArticle);
+			extractMock.mockResolvedValue(mockParsedArticle);
 			uploadMock.mockRejectedValue({
 				message: 'Failed to store the article',
 				status: 500,
