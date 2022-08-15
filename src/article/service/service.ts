@@ -74,7 +74,7 @@ class Article {
 			if (!content) {
 				throw new TandainError('Failed to read the article to be saved', {
 					code: 400,
-					name: 'ARTICLE_NOT_FOUND',
+					name: 'FAILED_TO_PARSE',
 				});
 			}
 
