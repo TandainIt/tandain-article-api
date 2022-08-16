@@ -20,15 +20,11 @@ jest.mock('@aws-sdk/client-s3', () => {
 	return { S3: jest.fn(() => instance) };
 });
 
-jest.mock('article-parser', () => {
-	return { extract: jest.fn() };
-});
+jest.mock('article-parser', () => ({ extract: jest.fn() }));
+
+jest.mock('../model');
 
 const uploadMock = jest.spyOn(Article as any, 'upload');
-
-const mockFindMany = jest.spyOn(ArticleModel, 'findMany');
-const mockFindOne = jest.spyOn(ArticleModel, 'findOne');
-const insertOneArticleMock = jest.spyOn(ArticleModel as any, 'insertOne');
 
 describe('article/service', () => {
 	const mockFilePath = 'content/2022/07/filename';
@@ -47,6 +43,12 @@ describe('article/service', () => {
 		updated_at: new Date().toISOString(),
 		file_path: mockFilePath,
 	};
+
+	let mockArticleModel: jest.Mocked<typeof ArticleModel>;
+
+	beforeEach(() => {
+		mockArticleModel = ArticleModel as jest.Mocked<typeof ArticleModel>;
+	});
 
 	describe('upload', () => {
 		let mockS3: any;
@@ -132,7 +134,7 @@ describe('article/service', () => {
 
 	describe('get', () => {
 		it('should return an article by id', async () => {
-			mockFindOne.mockResolvedValue(mockArticle);
+			mockArticleModel.findOne.mockResolvedValue(mockArticle);
 
 			const article = await Article.get(1);
 
@@ -140,7 +142,7 @@ describe('article/service', () => {
 		});
 
 		it('should return null if article by id is not exist', async () => {
-			mockFindOne.mockResolvedValue(null);
+			mockArticleModel.findOne.mockResolvedValue(null);
 
 			const article = await Article.get(1);
 
@@ -148,7 +150,7 @@ describe('article/service', () => {
 		});
 
 		it('should return error if there is something wrong when getting an article from database', async () => {
-			mockFindOne.mockRejectedValue({
+			mockArticleModel.findOne.mockRejectedValue({
 				message: 'Failed to retrieve memory usage at process exit',
 				status: 500,
 			});
@@ -174,7 +176,7 @@ describe('article/service', () => {
 
 			extractMock.mockResolvedValue(mockParsedArticle);
 			uploadMock.mockResolvedValue(mockFilePath);
-			insertOneArticleMock.mockResolvedValue(mockArticle);
+			mockArticleModel.insertOne.mockResolvedValue(mockArticle);
 
 			const article = await Article.add(urlMock, 1);
 
@@ -263,7 +265,7 @@ describe('article/service', () => {
 				},
 			];
 
-			mockFindMany.mockResolvedValue(mockArticles);
+			mockArticleModel.findMany.mockResolvedValue(mockArticles);
 
 			const article = new Article(1);
 			const resArticles = await article.getMany();
@@ -274,7 +276,7 @@ describe('article/service', () => {
 		it('should return empty array if article that related to the user ID is empty', async () => {
 			const mockArticles: IArticle[] = [];
 
-			mockFindMany.mockResolvedValue(mockArticles);
+			mockArticleModel.findMany.mockResolvedValue(mockArticles);
 
 			const article = new Article(1);
 			const resArticles = await article.getMany();
@@ -318,7 +320,7 @@ describe('article/service', () => {
 				},
 			];
 
-			mockFindMany.mockResolvedValue(mockArticles);
+			mockArticleModel.findMany.mockResolvedValue(mockArticles);
 
 			const article = new Article(1);
 			const resArticles = await article.getMany({ limit: 2 });
@@ -346,7 +348,7 @@ describe('article/service', () => {
 				},
 			];
 
-			mockFindMany.mockResolvedValue(mockArticles);
+			mockArticleModel.findMany.mockResolvedValue(mockArticles);
 
 			const article = new Article(1);
 			const resArticles = await article.getMany({ offset: 2 });
@@ -355,7 +357,7 @@ describe('article/service', () => {
 		});
 
 		it('should return error if there is something wrong when getting an article from database', async () => {
-			mockFindMany.mockRejectedValue({
+			mockArticleModel.findMany.mockRejectedValue({
 				message: 'Failed to retrieve memory usage at process exit',
 				status: 500,
 			});
