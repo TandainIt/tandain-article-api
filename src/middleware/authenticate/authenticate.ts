@@ -21,10 +21,19 @@ const authenticate = async (
 			});
 		}
 
-		const { sub, name, email } = jwt.verify(
+		const { sub, name, email, exp } = jwt.verify(
 			idToken,
 			jwtSecret
 		) as unknown as JWTPayload;
+
+		const dateNow = Date.now();
+
+    if(exp && dateNow > exp) {
+      throw new TandainError('Authentication token is expired', {
+				code: 401,
+				name: 'TOKEN_EXPIRED',
+			});
+    }
 
 		const user = {
 			id: sub,

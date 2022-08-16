@@ -30,6 +30,7 @@ describe('middleware/authenticate', () => {
 			sub: 1,
 			name: 'test',
 			email: 'test@test.com',
+      exp: Date.now() + 1000,
 		};
 
 		mockJwtVerify.mockImplementation(() => mockJwtReturnValue);
@@ -67,7 +68,7 @@ describe('middleware/authenticate', () => {
 		});
 	});
 
-	it('should send "Authentication is expired" message if token is expired', () => {
+	it('should send "Authentication token is expired" message if token is expired', () => {
 		mockJwtVerify.mockImplementation(() => {
 			throw new TokenExpiredError('jwt expired', new Date());
 		});
@@ -78,17 +79,24 @@ describe('middleware/authenticate', () => {
 			},
 		};
 
+		mockJwtVerify.mockImplementation(() => ({
+			sub: 1,
+			name: 'test',
+			email: 'test@test.com',
+			exp: Date.now() - 1000,
+		}));
+
 		authenticate(
 			mockRequest as Request,
 			mockResponse as Response,
 			nextFunction
 		);
 
-	  expect(mockResponse.status).toHaveBeenCalledWith(401);
+		expect(mockResponse.status).toHaveBeenCalledWith(401);
 		expect(mockResponse.json).toHaveBeenCalledWith({
 			code: 401,
 			name: 'TOKEN_EXPIRED',
-			message: 'Authentication is expired',
+			message: 'Authentication token is expired',
 		});
 	});
 });
