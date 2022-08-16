@@ -4,6 +4,7 @@ import request from 'supertest';
 import Article from '../service';
 import mockParsedArticle from '../../../__mock__/article.mock';
 import { IArticle } from '../service/service.types';
+import TandainError from '@/utils/TandainError';
 
 jest.mock('@/middleware/authenticate', () =>
 	jest.fn((req, _2, next) => {
@@ -128,6 +129,98 @@ describe('article/controller', () => {
 			const res = await request(app).get(`${BASE_URL}/article`).expect(200);
 
 			expect(res.body).toEqual(mockGetManyResult);
+		});
+
+		it('should return a list of article that related to the user ID based on limit parameter', async () => {
+			const mockGetManyResult: IArticle[] = [
+				{
+					id: 1,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+				{
+					id: 2,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+			];
+			mockArticleClass.mockImplementation(() => ({
+				getMany: () => mockGetManyResult,
+			}));
+
+			const res = await request(app)
+				.get(`${BASE_URL}/article?limit=2`)
+				.expect(200);
+
+			expect(res.body).toEqual(mockGetManyResult);
+		});
+
+		it('should return a list of article that related to the user ID based on offset parameter', async () => {
+			const mockGetManyResult: IArticle[] = [
+				{
+					id: 3,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+			];
+			mockArticleClass.mockImplementation(() => ({
+				getMany: () => mockGetManyResult,
+			}));
+
+			const res = await request(app).get(`${BASE_URL}/article`).expect(200);
+
+			expect(res.body).toEqual(mockGetManyResult);
+		});
+
+		it('should return the error message if there is something went wrong', async () => {
+			const mockGetManyError =
+				'Failed to retrieve memory usage at process exit';
+			mockArticleClass.mockImplementation(() => ({
+				getMany: () => {
+					throw new TandainError(mockGetManyError, { code: 500 });
+				},
+			}));
+
+			const res = await request(app).get(`${BASE_URL}/article`).expect(500);
+
+			expect(res.body).toEqual({
+				code: 500,
+				message: 'Failed to retrieve memory usage at process exit',
+				name: 'Internal Server Error',
+			});
 		});
 	});
 
