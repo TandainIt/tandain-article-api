@@ -3,6 +3,7 @@ import request from 'supertest';
 
 import Article from '../service';
 import mockParsedArticle from '../../../__mock__/article.mock';
+import { IArticle } from '../service/service.types';
 
 jest.mock('@/middleware/authenticate', () =>
 	jest.fn((req, _2, next) => {
@@ -15,6 +16,8 @@ jest.mock('@/middleware/authenticate', () =>
 		next();
 	})
 );
+
+jest.mock('../service');
 
 const articleAddMock = jest.spyOn(Article, 'add');
 const mockArticleGet = jest.spyOn(Article, 'get');
@@ -39,6 +42,13 @@ describe('article/controller', () => {
 		file_path: mockFilePath,
 	};
 
+	let mockArticleClass: any;
+
+	beforeEach(() => {
+		// NOTE: Clear all instances and calls to constructor and all methods:
+		mockArticleClass = Article;
+	});
+
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
@@ -46,6 +56,79 @@ describe('article/controller', () => {
 	afterAll((done) => {
 		server.close();
 		done();
+	});
+
+	describe('GET /article', () => {
+		it('should return a list of article that related to the user ID', async () => {
+			const mockGetManyResult: IArticle[] = [
+				{
+					id: 1,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+				{
+					id: 2,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+				{
+					id: 3,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+			];
+			mockArticleClass.mockImplementation(() => ({
+				getMany: () => mockGetManyResult,
+			}));
+
+			const res = await request(app).get(`${BASE_URL}/article`).expect(200);
+
+			expect(res.body).toEqual(mockGetManyResult);
+		});
+
+		it('should return empty list of article that related to the user ID if article is not exists', async () => {
+			const mockGetManyResult: IArticle[] = [];
+			mockArticleClass.mockImplementation(() => ({
+				getMany: () => mockGetManyResult,
+			}));
+
+			const res = await request(app).get(`${BASE_URL}/article`).expect(200);
+
+			expect(res.body).toEqual(mockGetManyResult);
+		});
 	});
 
 	describe('GET /article/:id', () => {
