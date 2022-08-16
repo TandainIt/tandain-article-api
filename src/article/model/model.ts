@@ -29,15 +29,10 @@ class ArticleModel {
 	}
 
 	static async findOne(wheres: WhereArticleOne): Promise<IArticle | null> {
-		const whereQuery = joinQuery(wheres);
-
 		try {
-			const query = `SELECT * FROM articles WHERE ${whereQuery}`;
-			const result: QueryResult<IArticle> = await pool.query(query);
+			const resArticles = await this.findMany(wheres, { limit: 1 });
 
-			const article = result.rows[0] || null;
-
-			return article;
+			return resArticles[0] || null;
 		} catch (err) {
 			throw new TandainError(err.message, {
 				code: 500,
