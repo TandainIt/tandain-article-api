@@ -22,6 +22,146 @@ describe('article/model', () => {
 		jest.clearAllMocks();
 	});
 
+	describe('findMany', () => {
+		it('should return all items of article', async () => {
+			const mockRows = {
+				rows: [
+					{
+						id: 1,
+						user_id: 1,
+						source_url: 'https://reactjs.org/',
+						source_name: 'reactjs.org',
+						title: 'React – A JavaScript library for building user interfaces',
+						description: 'A JavaScript library for building user interfaces',
+						image: 'https://reactjs.org/logo-og.png',
+						author: null,
+						published: null,
+						ttr: 67,
+						created_at: null,
+						updated_at: null,
+						file_path:
+							'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+					},
+					{
+						id: 2,
+						user_id: 1,
+						source_url: 'https://reactjs.org/',
+						source_name: 'reactjs.org',
+						title: 'React – A JavaScript library for building user interfaces',
+						description: 'A JavaScript library for building user interfaces',
+						image: 'https://reactjs.org/logo-og.png',
+						author: null,
+						published: null,
+						ttr: 67,
+						created_at: null,
+						updated_at: null,
+						file_path:
+							'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+					},
+					{
+						id: 3,
+						user_id: 1,
+						source_url: 'https://reactjs.org/',
+						source_name: 'reactjs.org',
+						title: 'React – A JavaScript library for building user interfaces',
+						description: 'A JavaScript library for building user interfaces',
+						image: 'https://reactjs.org/logo-og.png',
+						author: null,
+						published: null,
+						ttr: 67,
+						created_at: null,
+						updated_at: null,
+						file_path:
+							'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+					},
+				],
+			};
+
+			pool.query.mockResolvedValue(mockRows);
+
+			const articles = await ArticleModel.findMany({ user_id: 1 });
+
+			expect(articles).toEqual(mockRows.rows);
+		});
+
+		it('should return items of article based on limit and offset option', async () => {
+			const mockRows = {
+				rows: [
+					{
+						id: 2,
+						user_id: 1,
+						source_url: 'https://reactjs.org/',
+						source_name: 'reactjs.org',
+						title: 'React – A JavaScript library for building user interfaces',
+						description: 'A JavaScript library for building user interfaces',
+						image: 'https://reactjs.org/logo-og.png',
+						author: null,
+						published: null,
+						ttr: 67,
+						created_at: null,
+						updated_at: null,
+						file_path:
+							'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+					},
+					{
+						id: 3,
+						user_id: 1,
+						source_url: 'https://reactjs.org/',
+						source_name: 'reactjs.org',
+						title: 'React – A JavaScript library for building user interfaces',
+						description: 'A JavaScript library for building user interfaces',
+						image: 'https://reactjs.org/logo-og.png',
+						author: null,
+						published: null,
+						ttr: 67,
+						created_at: null,
+						updated_at: null,
+						file_path:
+							'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+					},
+				],
+			};
+
+			pool.query.mockResolvedValue(mockRows);
+
+			const articles = await ArticleModel.findMany(
+				{ user_id: 1 },
+				{
+					limit: 2,
+					offset: 1,
+				}
+			);
+
+			expect(articles).toEqual(mockRows.rows);
+		});
+
+		it('should return empty array if article is not exists', async () => {
+			const mockRows = {
+				rows: [],
+			};
+
+			pool.query.mockResolvedValue(mockRows);
+
+			const articles = await ArticleModel.findMany({ user_id: 1 });
+
+			expect(articles).toEqual([]);
+		});
+
+		it('should throw an error if something went wrong', async () => {
+			const posgresqlError = {
+				name: 'system_error',
+				code: '58000',
+				message: 'Failed to retrieve memory usage at process exit',
+			};
+
+			pool.query.mockRejectedValue(posgresqlError);
+
+			await expect(ArticleModel.findMany({ user_id: 1 })).rejects.toThrowError(
+				new TandainError('Failed to retrieve memory usage at process exit')
+			);
+		});
+	});
+
 	describe('findOne', () => {
 		it('should return article by id', async () => {
 			const mockArticleId = 49;

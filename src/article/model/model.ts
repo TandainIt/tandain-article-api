@@ -4,9 +4,30 @@ import { QueryResult } from 'pg';
 import { getInsertValue, joinQuery } from '@/utils/model/model';
 import TandainError from '@/utils/TandainError';
 import Article from '../service';
-import { WhereArticleOne, InsertArticle } from './model.types';
+import { WhereArticleOne, InsertArticle, QueryOptions } from './model.types';
 
 class ArticleModel {
+	static async findMany(
+		wheres: Partial<Article>,
+		options?: QueryOptions
+	): Promise<Article[]> {
+		const { limit = null, offset = null } = options || {};
+		const whereQuery = joinQuery(wheres);
+
+		try {
+			const query = `SELECT * FROM articles WHERE ${whereQuery} LIMIT ${limit} OFFSET ${offset}`;
+			const result: QueryResult<Article> = await pool.query(query);
+
+			const article = result.rows;
+
+			return article;
+		} catch (err) {
+			throw new TandainError(err.message, {
+				code: 500,
+			});
+		}
+	}
+
 	static async findOne(wheres: WhereArticleOne): Promise<Article | null> {
 		const whereQuery = joinQuery(wheres);
 
