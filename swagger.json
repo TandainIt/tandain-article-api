@@ -158,6 +158,55 @@
 
 	"paths": {
 		"/api/v1/article": {
+			"get": {
+				"summary": "Get a list of article that relate to user ID.",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"description": "Limit the number of article items.",
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"minimum": 1
+						},
+						"example": 1
+					},
+					{
+						"in": "query",
+						"name": "offset",
+						"description": "Omit a specified number of article items before the beginning of the result set.",
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"minimum": 1
+						},
+						"example": 1
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Success to GET the list of article",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ARTICLE"
+									}
+								},
+								"examples": {
+									"ARTICLE": [
+										{
+											"$ref": "#/components/examples/ARTICLE"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			},
 			"post": {
 				"summary": "Add an article from given URL",
 				"requestBody": {

@@ -6,6 +6,27 @@ import TandainError from '@/utils/TandainError';
 
 const router = Router();
 
+router.get('/article', authenticate, async (req, res) => {
+	const { limit, offset } = req.query;
+  
+	const limitInt = limit ? +limit : undefined;
+	const offsetInt = offset ? +offset : undefined;
+	const userId = req.user.id;
+
+	const article = new Article(userId);
+
+	try {
+		const resArticles = await article.getMany({
+			limit: limitInt,
+			offset: offsetInt,
+		});
+
+		res.send(resArticles);
+	} catch (err) {
+		res.status(err.code).json({ ...err, message: err.message });
+	}
+});
+
 router.get('/article/:id', authenticate, async (req, res) => {
 	const articleId = +req.params.id;
 
