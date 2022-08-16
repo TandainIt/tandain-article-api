@@ -6,6 +6,7 @@ import Article from './service';
 import ArticleModel from '../model';
 import TandainError from '@/utils/TandainError';
 import mockParsedArticle from '../../../__mock__/article.mock';
+import { IArticle } from './service.types';
 
 jest.mock('uuid', () => ({
 	v4: jest.fn().mockReturnValue('uuid'),
@@ -25,6 +26,7 @@ jest.mock('article-parser', () => {
 
 const uploadMock = jest.spyOn(Article as any, 'upload');
 
+const mockFindMany = jest.spyOn(ArticleModel, 'findMany');
 const mockFindOne = jest.spyOn(ArticleModel, 'findOne');
 const insertOneArticleMock = jest.spyOn(ArticleModel as any, 'insertOne');
 
@@ -204,6 +206,167 @@ describe('article/service', () => {
 
 			await expect(Article.add(urlMock, 1)).rejects.toThrowError(
 				new TandainError('Failed to store the article')
+			);
+		});
+	});
+
+	describe('getMany', () => {
+		it('should return all article that related to the user ID', async () => {
+			const mockArticles: IArticle[] = [
+				{
+					id: 1,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+				{
+					id: 2,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+				{
+					id: 3,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+			];
+
+			mockFindMany.mockResolvedValue(mockArticles);
+
+			const article = new Article(1);
+			const resArticles = await article.getMany();
+
+			expect(resArticles).toEqual(mockArticles);
+		});
+
+		it('should return empty array if article that related to the user ID is empty', async () => {
+			const mockArticles: IArticle[] = [];
+
+			mockFindMany.mockResolvedValue(mockArticles);
+
+			const article = new Article(1);
+			const resArticles = await article.getMany();
+
+			expect(resArticles).toEqual(mockArticles);
+		});
+
+		it('should return article that related to user ID based on limit option', async () => {
+			const mockArticles: IArticle[] = [
+				{
+					id: 1,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+				{
+					id: 2,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+			];
+
+			mockFindMany.mockResolvedValue(mockArticles);
+
+			const article = new Article(1);
+			const resArticles = await article.getMany({ limit: 2 });
+
+			expect(resArticles).toEqual(mockArticles);
+		});
+
+		it('should return article that related to user ID based on offset option', async () => {
+			const mockArticles: IArticle[] = [
+				{
+					id: 3,
+					user_id: 1,
+					source_url: 'https://reactjs.org/',
+					source_name: 'reactjs.org',
+					title: 'React – A JavaScript library for building user interfaces',
+					description: 'A JavaScript library for building user interfaces',
+					image: 'https://reactjs.org/logo-og.png',
+					author: null,
+					published: null,
+					ttr: 67,
+					created_at: '2022-08-16T16:25:41.540Z',
+					updated_at: '2022-08-16T16:25:41.540Z',
+					file_path:
+						'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+				},
+			];
+
+			mockFindMany.mockResolvedValue(mockArticles);
+
+			const article = new Article(1);
+			const resArticles = await article.getMany({ offset: 2 });
+
+			expect(resArticles).toEqual(mockArticles);
+		});
+
+		it('should return error if there is something wrong when getting an article from database', async () => {
+			mockFindMany.mockRejectedValue({
+				message: 'Failed to retrieve memory usage at process exit',
+				status: 500,
+			});
+
+			const article = new Article(1);
+
+			await expect(article.getMany()).rejects.toThrowError(
+				new TandainError('Failed to retrieve memory usage at process exit', {
+					code: 500,
+					name: 'Internal Server Error',
+				})
 			);
 		});
 	});

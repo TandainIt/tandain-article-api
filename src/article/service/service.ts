@@ -4,21 +4,15 @@ import { v4 as uuidv4 } from 'uuid';
 import ArticleModel from '../model';
 import s3 from '@/config/S3';
 import TandainError from '@/utils/TandainError';
+import { QueryOptions } from '../model/model.types';
+import { IArticle } from './service.types';
+
+interface Article extends IArticle {}
 
 class Article {
-	public id: number;
-	public user_id: number;
-	public file_path: string;
-	public title: string | null;
-	public description: string | null;
-	public image: string | null;
-	public author: string | null;
-	public published: string | null; // NOTE: Published ISO date
-	public source_name: string | null;
-	public source_url: string | null;
-	public ttr: number | null; // NOTE: Time to read the article
-	public created_at: string;
-	public updated_at: string;
+	constructor(userId: number) {
+		this.user_id = userId;
+	}
 
 	private static async upload(article: string, userId: number) {
 		// NOTE: Upload article to AWS S3
@@ -97,6 +91,14 @@ class Article {
 			return insertedArticle;
 		} catch (err) {
 			throw new TandainError(err.message);
+		}
+	}
+
+	async getMany(options?: QueryOptions) {
+		try {
+			return await ArticleModel.findMany({ user_id: this.user_id }, options);
+		} catch ({ message, code, name }) {
+			throw new TandainError(message, { code, name });
 		}
 	}
 }
