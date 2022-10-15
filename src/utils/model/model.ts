@@ -27,3 +27,9 @@ export const getInsertValue = (obj: ObjectQuery) => {
 
 	return { columns, values };
 };
+
+export const generateOrderByQuery = (obj: ObjectQuery) => {
+	return Object.keys(obj)
+		.map((key) => `${key} ${obj[key].toUpperCase()}`)
+		.join(', ');
+};

@@ -1,4 +1,4 @@
-import { getInsertValue, joinQuery } from './model';
+import { generateOrderByQuery, getInsertValue, joinQuery } from './model';
 import { ObjectQuery } from './model.types';
 
 describe('utils/model', () => {
@@ -67,6 +67,19 @@ describe('utils/model', () => {
 
 			expect(columns.split(', ')).toEqual(keys);
 			expect(values.split(', ')).toEqual(mockValues);
+		});
+	});
+
+	describe('generateOrderByQuery', () => {
+		it('should generate string based on order by object', () => {
+			const obj = {
+				id: 'asc',
+				name: 'desc',
+			};
+
+			const orderByStr = generateOrderByQuery(obj);
+
+			expect(orderByStr).toEqual('id ASC, name DESC');
 		});
 	});
 });
