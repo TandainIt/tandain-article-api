@@ -184,6 +184,56 @@ describe('article/model', () => {
 			expect(articles).toEqual(mockRows.rows);
 		});
 
+		it('should return items of article based on orderBy option', async () => {
+			const mockRows = {
+				rows: [
+					{
+						id: 3,
+						user_id: 1,
+						source_url: 'https://reactjs.org/',
+						source_name: 'reactjs.org',
+						title: 'React – A JavaScript library for building user interfaces',
+						description: 'A JavaScript library for building user interfaces',
+						image: 'https://reactjs.org/logo-og.png',
+						author: null,
+						published: null,
+						ttr: 67,
+						created_at: null,
+						updated_at: null,
+						file_path:
+							'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+					},
+					{
+						id: 2,
+						user_id: 1,
+						source_url: 'https://reactjs.org/',
+						source_name: 'reactjs.org',
+						title: 'React – A JavaScript library for building user interfaces',
+						description: 'A JavaScript library for building user interfaces',
+						image: 'https://reactjs.org/logo-og.png',
+						author: null,
+						published: null,
+						ttr: 67,
+						created_at: null,
+						updated_at: null,
+						file_path:
+							'content/2022/8/1-dfbd4fdb-00f6-48bc-8cb3-ff168799f07d.html',
+					},
+				],
+			};
+
+			pool.query.mockResolvedValue(mockRows);
+
+			const articles = await ArticleModel.findMany(
+				{ user_id: 1 },
+				{
+					orderBy: { id: 'desc' },
+				}
+			);
+
+			expect(articles).toEqual(mockRows.rows);
+		});
+
 		it('should return empty array if article is not exists', async () => {
 			const mockRows = {
 				rows: [],

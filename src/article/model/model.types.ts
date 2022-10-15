@@ -4,6 +4,7 @@ import Article from '../service';
 export interface QueryOptions {
 	limit?: number | null;
 	offset?: number | null;
+	orderBy?: { [key: string]: string };
 }
 
 export type ArticleUniqueColumn = {

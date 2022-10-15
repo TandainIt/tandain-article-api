@@ -1,7 +1,7 @@
 import pool from '@/config/db/postgresql';
 import { QueryResult } from 'pg';
 
-import { getInsertValue, joinQuery } from '@/utils/model/model';
+import { generateOrderByQuery, getInsertValue, joinQuery } from '@/utils/model';
 import TandainError from '@/utils/TandainError';
 import { WhereArticleOne, InsertArticle, QueryOptions } from './model.types';
 import { IArticle } from '../service/service.types';
@@ -11,11 +11,16 @@ class ArticleModel {
 		wheres: Partial<IArticle>,
 		options?: QueryOptions
 	): Promise<IArticle[]> {
-		const { limit = null, offset = null } = options || {};
+		const {
+			limit = null,
+			offset = null,
+			orderBy = { id: 'desc' },
+		} = options || {};
 		const whereQuery = joinQuery(wheres);
+		const orderByQuery = generateOrderByQuery(orderBy);
 
 		try {
-			const query = `SELECT * FROM articles WHERE ${whereQuery} LIMIT ${limit} OFFSET ${offset}`;
+			const query = `SELECT * FROM articles WHERE ${whereQuery} ORDER BY ${orderByQuery} LIMIT ${limit} OFFSET ${offset}`;
 			const result: QueryResult<IArticle> = await pool.query(query);
 
 			const article = result.rows;
